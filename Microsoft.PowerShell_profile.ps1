@@ -17,8 +17,11 @@ function Check-Sync {
 # Quickly get the total Powershell history.
 function pshistory { Get-Content (Get-PSReadlineOption).HistorySavePath }
 
-# yt-dlp alias for getting the wav file from a youtube video.
+# yt-dlp alias for getting the wav file.
 function yt-dlp-audio($url) { yt-dlp --extract-audio --audio-format wav $url }
+
+# yt-dlp alias to get video as mp4 file.
+function yt-dlp-mp4($url) { yt-dlp -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best" $url }
 
 # Create a new terminal with admin privileges.
 function admin {
@@ -203,4 +206,4 @@ Clear-Host
 oh-my-posh.exe init pwsh --config "$OH_MY_POSH_THEME_PATH" | Invoke-Expression
 
 # Clear and print fastfetch
-fastfetch.exe --packages-disabled ''
+fastfetch.exe
