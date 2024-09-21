@@ -20,6 +20,36 @@ function pshistory { Get-Content (Get-PSReadlineOption).HistorySavePath }
 # yt-dlp alias for getting the wav file from a youtube video.
 function yt-dlp-audio($url) { yt-dlp --extract-audio --audio-format wav $url }
 
+# Create a new terminal with admin privileges.
+function admin {
+    if ($args.Count -gt 0) {
+        $argList = "& '$args'"
+        Write-Host $argList
+        Start-Process wt -Verb runAs -ArgumentList "pwsh.exe -NoExit -Command $argList"
+    }
+    else {
+        Start-Process wt -Verb runAs
+    }
+}
+
+# Open WinUtil with admin privileges.
+function winutil {
+    gsudo { Invoke-WebRequest -useb https://christitus.com/win | Invoke-Expression }
+}
+
+# Aliases for Bash realpath, basename, and dirname
+function realpath($path) {
+    (Get-Item $path).FullName
+}
+
+function basename($path) {
+    (Get-Item $path).Name
+}
+
+function dirname($path) {
+    (Get-Item $path).DirectoryName
+}
+
 # Validate the directory to make sure the argument is not null or empty.
 function Validate-Directory($dir) {
     if (([string]::IsNullOrEmpty($dir))) {
@@ -107,6 +137,13 @@ Set-Alias -Name vim -Value nvim
 # https://github.com/VSCodium/vscodium
 Set-Alias -Name code -Value codium
 
+# Alias for bashlike find.
+Set-Alias -Name gfind -Value "C:\Program Files (x86)\GnuWin32\bin\find.exe"
+Set-Alias -Name gnufind -Value "C:\Program Files (x86)\GnuWin32\bin\find.exe"
+
+# Set UNIX-like aliases for the admin command, so sudo <command> will run the command with elevated rights.
+Set-Alias -Name su -Value admin
+
 #####################################
 # Variables
 #####################################
@@ -155,14 +192,12 @@ Start-Job -Name $SettingsSyncJobName -ScriptBlock {
     choco export -o  "$w11TerminalSyncPath/choco_packages.txt"
 }
 
-
-
 #####################################
 # Setting up new terminal window.
 #####################################
 
 # Clear any output from before :)
-clear
+Clear-Host
 
 # Init oh-my-posh
 oh-my-posh.exe init pwsh --config "$OH_MY_POSH_THEME_PATH" | Invoke-Expression
