@@ -190,8 +190,17 @@ Start-Job -Name $SettingsSyncJobName -ScriptBlock {
     Copy-Item -Force $fastFetchFolder $w11TerminalSyncPath -Recurse
     Copy-Item -Force $w11TerminalSettingsFolder $w11TerminalSyncPath -Recurse
     Copy-Item -Force $sshFolder $w11TerminalSyncPath -Recurse
-    Copy-Item -Force $glzrPath $w11TerminalSyncPath -Recurse
+    # No longer using zebar or glazewm
+    # Copy-Item -Force $glzrPath $w11TerminalSyncPath -Recurse
+
+    # Remove old packages path
+    if (Test-Path "$w11TerminalSyncPath/winget_packages_old.txt") {
+        Remove-Item "$w11TerminalSyncPath/winget_packages_old.txt" -Force
+    }
+    Copy-Item "$w11TerminalSyncPath/winget_packages.txt" "$w11TerminalSyncPath/winget_packages_old.txt"
+    Remove-Item "$w11TerminalSyncPath/winget_packages.txt" -Force
     winget export -o "$w11TerminalSyncPath/winget_packages.txt"
+    
     choco export -o  "$w11TerminalSyncPath/choco_packages.txt"
 }
 
