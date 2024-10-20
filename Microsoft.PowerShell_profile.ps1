@@ -2,9 +2,123 @@
 # Functions for commands
 #####################################
 
+# Install/Update winget, choco, and scoop.
+function Setup-Package-Managers {
+    Write-Host "Checking if winget is installed."
+    $wingetExists = Get-Command winget -ErrorAction SilentlyContinue
+    if (-not $wingetExists) {
+        Write-Host "winget is not installed. Installing..."
+
+        # From: https://stackoverflow.com/a/75334942
+        # get latest download url
+        $URL = "https://api.github.com/repos/microsoft/winget-cli/releases/latest"
+        $URL = (Invoke-WebRequest -Uri $URL).Content | ConvertFrom-Json |
+        Select-Object -ExpandProperty "assets" |
+        Where-Object "browser_download_url" -Match '.msixbundle' |
+        Select-Object -ExpandProperty "browser_download_url"
+        # download
+        Invoke-WebRequest -Uri $URL -OutFile "Setup.msix" -UseBasicParsing        # install
+        Add-AppxPackage -Path "Setup.msix"
+        # delete file
+        Remove-Item "Setup.msix"
+    }
+    else {
+        Write-Host "winget is installed. Updating..."
+        winget upgrade winget
+    }
+  
+    Write-Host "Checking if Chocolatey is installed."
+    $chocoExists = Get-Command choco -ErrorAction SilentlyContinue
+    if (-not $chocoExists) {
+        Write-Host "Chocolatey is not installed. Installing..."
+        Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    }
+    else {
+        Write-Host "Chocolatey is installed. Updating..."
+        choco upgrade chocolatey
+    }
+  
+    Write-Host "Checking if Scoop is installed."
+    $scoopExists = Get-Command scoop -ErrorAction SilentlyContinue
+    if (-not $scoopExists) {
+        Write-Host "Scoop is not installed. Installing..."
+        Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+        Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+    }
+    else {
+        Write-Host "Scoop is installed. Updating..."
+        scoop update
+    }
+}
+
+# Installs oh-my-posh, fastfetch, and neovim.
+function Setup-Basic-Packages {
+    winget install gerardog.gsudo -s winget
+    winget install Fastfetch-cli.Fastfetch -s winget
+    winget install Neovim.Neovim -s winget
+
+    winget install JanDeDobbeleer.OhMyPosh -s winget
+    $ohMyPoshBin = "$HOME\AppData\Local\Programs\oh-my-posh\bin"
+    $currentPath = [Environment]::GetEnvironmentVariable("PATH", "$env:USERNAME")
+    # Check if the path is already in the PATH variable
+    if ($currentPath -notlike "*$ohMyPoshBin*") {
+        # Add the path to the beginning of the PATH variable
+        $newPath = "$ohMyPoshBin;$currentPath"
+        [Environment]::SetEnvironmentVariable("PATH", $newPath, "User")
+  
+        Write-Host "Path added to environment variables. You may need to restart PowerShell or your current terminal session for the changes to take effect."
+    }
+    else {
+        Write-Host "Oh-My-Posh already exists in environment variables."
+    }
+    Copy-Item "$env:POSH_THEMES_PATH\paradox.omp.json" "$env:POSH_THEMES_PATH\CUSTOM.omp.json"
+}
+
+# Setup Powershell again from a backed-up directory.
+function Restore-Profile($dir) {
+    Setup-Package-Managers
+    Validate-Directory($dir)
+
+    # Installing Programs
+    Write-Host "Installing Winget Packages."
+    winget import -i "$dir/winget_packages.txt" --accept-package-agreements --accept-source-agreements --ignore-unavailable
+    Write-Host "Installing Choco Packages."
+    choco install -y "$dir/choco_packages.txt"
+    Write-Host "Installing Scoop Packages."
+    scoop import "$dir/scoop_packages.txt"
+
+    # Folders
+    Write-Host "Importing folder configurations."
+    Restore-Config 'glzr' 'glzr (e.g. GlazeWM & Zebar)' "$dir/.glzr" "$HOME"
+    Restore-Config 'SSH' 'SSH Keys' "$dir/.ssh" "$HOME"
+    Restore-Config 'FastFetch' 'FastFetch configuration' "$dir/fastfetch" "$HOME/.config/fastfetch"
+    Restore-Config 'Terminal' 'Windows 11 Terminal Settings' "$dir/LocalState" "$HOME\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState"
+
+    # Files
+    Write-Host "Importing file configs."
+    Restore-Config 'Oh-my-Posh' 'Oh-my-Posh Configuration' "$dir/paradox2.omp.json" "$env:POSH_THEMES_PATH/paradox2.omp.json"
+    Restore-Config 'Gemini' 'Gemini API Key' "$dir/GeminiApiKey.txt" "$HOME"
+
+    # File Regexes
+    Write-Host "Importing file regexes."
+    Restore-Config 'Powershell' 'Powershell (PS1) Scripts' "$dir/*.ps1" "$HOME"
+    Restore-Config 'Batch' 'Batch Scripts' "$dir/*.bat" "$HOME"
+}
+
 # Reload profile.
 function Reload-Profile {
     & $PROFILE
+}
+
+# Reboot the computer
+function Reboot {
+    shutdown -r -t 0
+}
+
+# Restart explorer.exe
+function Restart-Explorer {
+    taskkill /F /IM explorer.exe
+    Start-Process explorer.exe
 }
 
 # Check Settings Sync status.
@@ -40,6 +154,11 @@ function winutil {
     gsudo { Invoke-WebRequest -useb https://christitus.com/win | Invoke-Expression }
 }
 
+# Open WinUtil-Dev with admin privileges.
+function winutil-dev {
+    gsudo { Invoke-WebRequest -useb https://christitus.com/windev | Invoke-Expression }
+}
+
 # Aliases for Bash realpath, basename, and dirname
 function realpath($path) {
     (Get-Item $path).FullName
@@ -66,18 +185,30 @@ function Validate-Directory($dir) {
 
 # Restore the contents of a folder to a particular file. This function overwrites all contents.
 function Restore-Folder($from, $to) {
-    throw "TO BE IMPLEMENTED"
-
     Validate-Directory($from)
+    if (!(Test-Path -Path $to -PathType Container)) {
+        New-Item -ItemType Directory -Path $to
+    }
     Validate-Directory($to)
+
+    # Get files in folder.
+    $files = Get-ChildItem -Path $from -File
+    foreach ($file in $files) {
+        $sourceFile = $file.FullName
+        Restore-Files $sourceFile $to
+    }
 }
 
 # Restore the contents of a the file(s) to the directory. This function overwrites all contents.
 function Restore-Files($from, $to) {
-    throw "TO BE IMPLEMENTED"
-
     Validate-Directory($from)
+    if (!(Test-Path -Path $to -PathType Container)) {
+        New-Item -ItemType Directory -Path $to
+    }
     Validate-Directory($to)
+
+    # Copy item. At this point, $from is a regex or file path.
+    Copy-Item -Force $from $to
 }
 
 # Creates the restoration prompt and handling.
@@ -112,13 +243,6 @@ function Restore-Config($configName, $configDesc, $configSourceFolder, $configTa
     else {
         Write-Host "Skipping $configName files."
     }
-}
-
-# Setup Powershell again from a backed-up directory.
-function Restore-Profile($dir) {
-    Validate-Directory($dir)
-
-    Restore-Config 'glzr' 'glzr (e.g. GlazeWM & Zebar)' "$dir/.glzr" "$HOME"
 }
 
 #####################################
@@ -161,7 +285,7 @@ $ZEBAR = "$HOME/.glzr/zebar/config.yaml"
 $ZEBAR_START = "$HOME/.glzr/zebar/start.bat"
 $GLAZEWM = "$HOME/.glzr/glazewm/config.yaml"
 $FASTFETCH = "$HOME/.config/fastfetch/config.jsonc"
-$OH_MY_POSH_THEME_PATH = "$env:POSH_THEMES_PATH\paradox2.omp.json"
+$OH_MY_POSH_THEME_PATH = "$env:POSH_THEMES_PATH\CUSTOM.omp.json"
 
 #######################################################
 # Copy Profile & Settings to home directory for syncing
@@ -176,11 +300,12 @@ Start-Job -Name $SettingsSyncJobName -ScriptBlock {
     $fastFetchFolder = "$HOME/.config/fastfetch"
     $w11TerminalSettingsFolder = "$HOME\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState"
 
-    $ohMyPoshThemePath = "$env:POSH_THEMES_PATH\paradox2.omp.json"
+    $ohMyPoshThemePath = "$env:POSH_THEMES_PATH\CUSTOM.omp.json"
     $geminiApiKeyPath = "$HOME/GeminiApiKey.txt"
     
     # Output Dir
     $w11TerminalSyncPath = "$HOME\w11_terminal"
+    New-Item -ItemType Directory -Path $w11TerminalSyncPath -Force
 
     Copy-Item -Force $PROFILE "$w11TerminalSyncPath"
     Copy-Item -Force $ps1Scripts $w11TerminalSyncPath
@@ -190,8 +315,7 @@ Start-Job -Name $SettingsSyncJobName -ScriptBlock {
     Copy-Item -Force $fastFetchFolder $w11TerminalSyncPath -Recurse
     Copy-Item -Force $w11TerminalSettingsFolder $w11TerminalSyncPath -Recurse
     Copy-Item -Force $sshFolder $w11TerminalSyncPath -Recurse
-    # No longer using zebar or glazewm
-    # Copy-Item -Force $glzrPath $w11TerminalSyncPath -Recurse
+    Copy-Item -Force $glzrPath $w11TerminalSyncPath -Recurse
 
     # Remove old packages path
     if (Test-Path "$w11TerminalSyncPath/winget_packages_old.txt") {
@@ -202,6 +326,7 @@ Start-Job -Name $SettingsSyncJobName -ScriptBlock {
     winget export -o "$w11TerminalSyncPath/winget_packages.txt"
     
     choco export -o  "$w11TerminalSyncPath/choco_packages.txt"
+    scoop export > "$w11TerminalSyncPath/scoop_packages.txt"
 }
 
 #####################################
