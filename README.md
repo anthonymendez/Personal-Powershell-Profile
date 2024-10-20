@@ -4,6 +4,39 @@ This is my personal powershell profile that I use regularly.
 
 I decided to setup this Repo in case anyone else finds this useful.
 
+## Installing on a Fresh Install
+
+1. Open up the Terminal application.
+1. Allow PowerShell to run scripts.
+   ```PowerShell
+   Set-ExecutionPolicy Unrestricted -Scope CurrentUser
+   ```
+1. Create PowerShell profile if it doesn't exist. This will overwrite it if it doesn't exist.
+   ```PowerShell
+   New-Item -Path (Split-Path -Path $PROFILE -Parent) -ItemType Directory -Force | Out-Null; New-Item -Path $PROFILE -ItemType File -Force | Out-Null
+   ```
+1. Copy my PowerShell profile into your profile.
+   ```PowerShell
+   Invoke-WebRequest https://raw.githubusercontent.com/anthonymendez/Personal-Powershell-Profile/refs/heads/main/Microsoft.PowerShell_profile.ps1 -OutFile $PROFILE
+   ```
+1. Restart or reload your Terminal.
+   ```PowerShell
+   & $PROFILE
+   ```
+1. At this point, you'll likely see an error come up. **This is expected.**
+   ![{6E7AC942-7A74-4E2E-9956-3595419A5F24}](https://github.com/user-attachments/assets/8b033255-7a02-4a51-95a4-a846a5d97680)
+1. Run the Setup Package Mangers profile command. This will go through and install Winget, Chocolatey, and Scoop.
+   ```PowerShell
+   Setup-Package-Managers
+   ```
+1. Customize the profile and make it your own! I have several automated commands that run and backup config files I use regularly. Some sections you should customize:
+   * `Setup-Basic-Packages` - Installs oh-my-posh, FastFetch, Neovim, and gsudo. You may want your own essential programs here.
+   * `Restore-Profile` - Function that restores my configuration files based on a given folder.
+   * `Aliases` - Common aliases I use for certain programs.
+   * `Variables` - Common variables I use for quick access.
+   * `Start-Job -Name $SettingsSyncJobName -ScriptBlock` - Backs up your settings to the folder `$HOME\w11_terminal`.
+   * `Setting up new terminal window.` - Clears previous output, initializes oh-my-posh, and prints out fastfetch.
+
 ## Functions
 
 ### Reload-Profile
