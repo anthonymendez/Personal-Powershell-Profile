@@ -24,7 +24,7 @@ function Setup-Package-Managers {
     }
     else {
         Write-Host "winget is installed. Updating..."
-        winget upgrade winget
+        winget upgrade winget --accept-package-agreements --accept-source-agreements 
     }
   
     Write-Host "Checking if Chocolatey is installed."
@@ -60,11 +60,11 @@ function Setup-Package-Managers {
 
 # Installs oh-my-posh, fastfetch, and neovim.
 function Setup-Basic-Packages {
-    winget install gerardog.gsudo -s winget
-    winget install Fastfetch-cli.Fastfetch -s winget
-    winget install Neovim.Neovim -s winget
+    winget install gerardog.gsudo -s winget --accept-package-agreements --accept-source-agreements 
+    winget install Fastfetch-cli.Fastfetch -s winget --accept-package-agreements --accept-source-agreements 
+    winget install Neovim.Neovim -s winget --accept-package-agreements --accept-source-agreements 
 
-    winget install JanDeDobbeleer.OhMyPosh -s winget
+    winget install JanDeDobbeleer.OhMyPosh -s winget --accept-package-agreements --accept-source-agreements 
     $ohMyPoshBin = "$HOME\AppData\Local\Programs\oh-my-posh\bin"
     $currentPath = [Environment]::GetEnvironmentVariable("PATH", "$env:USERNAME")
     # Check if the path is already in the PATH variable
@@ -79,6 +79,8 @@ function Setup-Basic-Packages {
         Write-Host "Oh-My-Posh already exists in environment variables."
     }
     Copy-Item "$env:POSH_THEMES_PATH\paradox.omp.json" "$env:POSH_THEMES_PATH\CUSTOM.omp.json"
+
+    Reload-Profile
 }
 
 # Setup Powershell again from a backed-up directory.
