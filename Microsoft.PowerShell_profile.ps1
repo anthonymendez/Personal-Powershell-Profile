@@ -337,7 +337,13 @@ Start-Job -Name $SettingsSyncJobName -ScriptBlock {
 Clear-Host
 
 # Init oh-my-posh
-oh-my-posh.exe init pwsh --config "$OH_MY_POSH_THEME_PATH" | Invoke-Expression
+$ohMyPoshExe = Get-Command oh-my-posh.exe -ErrorAction SilentlyContinue
+if ($ohMyPoshExe) {
+    oh-my-posh.exe init pwsh --config "$OH_MY_POSH_THEME_PATH" | Invoke-Expression
+}
 
 # Clear and print fastfetch
-fastfetch.exe
+$fastFetchExe = Get-Command fastfetch.exe -ErrorAction SilentlyContinue
+if ($fastFetchExe) {
+    fastfetch.exe
+}
