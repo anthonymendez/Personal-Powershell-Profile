@@ -83,7 +83,7 @@ function Setup-Basic-Packages {
 
     # Open new terminal session to load with newly installed packages, and install the oh-my-posh Nerd fonts.
     $ohMyPoshFontInstall = "oh-my-posh font install meslo"
-    Start-Process -FilePath "$env:ProgramFiles\PowerShell\7\pwsh.exe" -ArgumentList "-NoExit", "-Command", $ohMyPoshFontInstall
+    Start-Process -FilePath "$HOME\AppData\Local\Microsoft\WindowsApps\wt.exe" -ArgumentList "-NoExit", "-Command", $ohMyPoshFontInstall
     exit
 }
 
