@@ -48,6 +48,7 @@ function Setup-Package-Managers {
         Write-Host "Scoop is not installed. Installing..."
         Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
         Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
+        scoop install git
     }
     else {
         Write-Host "Scoop is installed. Updating..."
@@ -80,7 +81,10 @@ function Setup-Basic-Packages {
     }
     Copy-Item "$env:POSH_THEMES_PATH\paradox.omp.json" "$env:POSH_THEMES_PATH\CUSTOM.omp.json"
 
-    Reload-Profile
+    # Open new terminal session to load with newly installed packages, and install the oh-my-posh Nerd fonts.
+    $ohMyPoshFontInstall = "oh-my-posh font install meslo"
+    Start-Process -FilePath "$env:ProgramFiles\PowerShell\7\pwsh.exe" -ArgumentList "-NoExit", "-Command", $ohMyPoshFontInstall
+    exit
 }
 
 # Setup Powershell again from a backed-up directory.
