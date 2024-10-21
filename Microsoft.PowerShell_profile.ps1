@@ -31,7 +31,11 @@ function Setup-Package-Managers {
     $chocoExists = Get-Command choco -ErrorAction SilentlyContinue
     if (-not $chocoExists) {
         Write-Host "Chocolatey is not installed. Installing..."
-        Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+        if (Test-Path "$env:ProgramData\chocolatey") {
+            Remove-Item -Path "$env:ProgramData\chocolatey" -Recurse -Force
+        }
+        $chocoInstallCommand = "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
+        Start-Process -FilePath "$env:ProgramFiles\PowerShell\7\pwsh.exe" -Verb RunAs -ArgumentList "-NoProfile", "-Command", "$chocoInstallCommand"
     }
     else {
         Write-Host "Chocolatey is installed. Updating..."
@@ -47,8 +51,11 @@ function Setup-Package-Managers {
     }
     else {
         Write-Host "Scoop is installed. Updating..."
+        scoop install git
         scoop update
     }
+
+    Reload-Profile
 }
 
 # Installs oh-my-posh, fastfetch, and neovim.
