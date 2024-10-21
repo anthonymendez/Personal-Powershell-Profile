@@ -7,27 +7,40 @@ I decided to setup this Repo in case anyone else finds this useful.
 ## Installing on a Fresh Install
 
 1. Open up the Terminal application.
-1. Allow PowerShell to run scripts.
+1. Update and make PowerShell 7 the default.
+
+   My profile script uses syntax only compatible with PowerShell 7. Windows comes with PowerShell 5 by default. The command below references Chris Titus Tech's [winutil](https://github.com/ChrisTitusTech/winutil) Invoke-WPFTweakPS7 function.
+
+   This script:
+   1. Installs PowerShell 7
+   2. Starts a new PowerShell 7 session that will set PowerShell 7 as the default.
+   3. Closes the original Terminal session.
+   
    ```PowerShell
-   Set-ExecutionPolicy Unrestricted -Scope CurrentUser
+   $command = "iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/ChrisTitusTech/winutil/refs/heads/main/functions/public/Invoke-WPFTweakPS7.ps1')); Invoke-WPFTweakPS7 -action PS7"
+   winget install --id Microsoft.PowerShell --source winget
+   Start-Process -FilePath "$env:ProgramFiles\PowerShell\7\pwsh.exe" -ArgumentList "-NoExit", "-Command", $command
+   exit
+   # Bye!
    ```
 1. Create PowerShell profile if it doesn't exist. This will overwrite it if it doesn't exist.
    ```PowerShell
    New-Item -Path (Split-Path -Path $PROFILE -Parent) -ItemType Directory -Force | Out-Null; New-Item -Path $PROFILE -ItemType File -Force | Out-Null
    ```
-1. Copy my PowerShell profile into your profile.
+1. Allow PowerShell scripts to run and copy my PowerShell profile into your profile.
    ```PowerShell
+   Set-ExecutionPolicy Unrestricted -Scope CurrentUser
    Invoke-WebRequest https://raw.githubusercontent.com/anthonymendez/Personal-Powershell-Profile/refs/heads/main/Microsoft.PowerShell_profile.ps1 -OutFile $PROFILE
    ```
-1. Restart or reload your Terminal.
+1. Restart the Terminal, now we'll setup/upgrade the Package Managers (winget, choco, scoop). Afterwards, we install our basic packages (gsudo, fastfetch, neovim, ohmyposh). We reload after each operation.
+
+   Restarting the terminal is necessary, as reloading the profile will not reload the functions.
+
    ```PowerShell
-   & $PROFILE
-   ```
-1. At this point, you'll likely see an error come up. **This is expected.**
-   ![{6E7AC942-7A74-4E2E-9956-3595419A5F24}](https://github.com/user-attachments/assets/8b033255-7a02-4a51-95a4-a846a5d97680)
-1. Run the Setup Package Mangers profile command. This will go through and install Winget, Chocolatey, and Scoop.
-   ```PowerShell
-   Setup-Package-Managers
+   $command = "Setup-Package-Managers; Setup-Basic-Packages"
+   Start-Process -FilePath "$env:ProgramFiles\PowerShell\7\pwsh.exe" -ArgumentList "-NoExit", "-Command", $command
+   exit
+   # Bye!
    ```
 1. Customize the profile and make it your own! I have several automated commands that run and backup config files I use regularly. Some sections you should customize:
    * `Setup-Basic-Packages` - Installs oh-my-posh, FastFetch, Neovim, and gsudo. You may want your own essential programs here.
