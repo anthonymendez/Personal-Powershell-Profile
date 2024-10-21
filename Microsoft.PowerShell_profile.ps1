@@ -35,7 +35,7 @@ function Setup-Package-Managers {
             Remove-Item -Path "$env:ProgramData\chocolatey" -Recurse -Force
         }
         $chocoInstallCommand = "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
-        Start-Process -FilePath "$env:ProgramFiles\PowerShell\7\pwsh.exe" -Verb RunAs -ArgumentList "-NoProfile", "-Command", "$chocoInstallCommand"
+        Start-Process -FilePath "$env:ProgramFiles\PowerShell\7\pwsh.exe" -Verb RunAs -ArgumentList "-NoProfile", "-Command", "$chocoInstallCommand" -Wait
     }
     else {
         Write-Host "Chocolatey is installed. Updating..."
