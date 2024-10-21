@@ -278,7 +278,9 @@ Set-Alias -Name su -Value admin
 # Set gemini environment variable
 # https://aistudio.google.com/app/apikey
 $GEMINI_API_KEY_PATH = "$HOME/GeminiApiKey.txt"
-$ENV:GEMINI_API_KEY = Get-Content $GEMINI_API_KEY_PATH
+if (Test-Path $GEMINI_API_KEY_PATH) {
+    $ENV:GEMINI_API_KEY = Get-Content $GEMINI_API_KEY_PATH
+}
 
 # Other environment variables
 $ZEBAR = "$HOME/.glzr/zebar/config.yaml"
