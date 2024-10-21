@@ -56,6 +56,9 @@ function Setup-Package-Managers {
         scoop update
     }
 
+    # Register 7zip in context menu.
+    Invoke-Expression $(Resolve-Path "$HOME\scoop\apps\7zip\current\install-context.reg")
+
     Reload-Profile
 }
 
@@ -80,10 +83,21 @@ function Setup-Basic-Packages {
         Write-Host "Oh-My-Posh already exists in environment variables."
     }
     Copy-Item "$env:POSH_THEMES_PATH\paradox.omp.json" "$env:POSH_THEMES_PATH\CUSTOM.omp.json"
+    oh-my-posh.exe font install meslo
+    $terminalSettingsFile = "$HOME\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+    $terminalSettingsJson = Get-Content $terminalSettingsFile | ConvertFrom-Json
+    # Check if "defaults" key exists under "profiles"
+    if ($terminalSettingsJson.profiles.defaults) {
+        # Replace the content of the "defaults" key
+        $terminalSettingsJson.profiles.defaults.font.face = "MesloLGM Nerd Font"
+  
+        # Convert the modified JSON back to a string and write to the file
+        $terminalSettingsJson | ConvertTo-Json | Set-Content $terminalSettingsFile
+    }
 
     # Open new terminal session to load with newly installed packages, and install the oh-my-posh Nerd fonts.
-    $ohMyPoshFontInstall = "oh-my-posh font install meslo"
-    Start-Process -FilePath "$HOME\AppData\Local\Microsoft\WindowsApps\wt.exe" -ArgumentList "-NoExit", "-Command", $ohMyPoshFontInstall
+    $ohMyPoshFontInstall = "oh-my-posh font install meslo; Reload-Profile"
+    Start-Process -FilePath "wt.exe" -ArgumentList "-d", $HOME, "-p", "Windows PowerShell", "-c", "$ohMyPoshFontInstall"
     exit
 }
 
