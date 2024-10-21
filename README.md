@@ -18,7 +18,7 @@ I decided to setup this Repo in case anyone else finds this useful.
    
    ```PowerShell
    $command = "iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/ChrisTitusTech/winutil/refs/heads/main/functions/public/Invoke-WPFTweakPS7.ps1')); Invoke-WPFTweakPS7 -action PS7"
-   winget install --id Microsoft.PowerShell --source winget
+   winget install --id Microsoft.PowerShell --source winget --accept-package-agreements --accept-source-agreements 
    Start-Process -FilePath "$env:ProgramFiles\PowerShell\7\pwsh.exe" -ArgumentList "-NoExit", "-Command", $command
    exit
    # Bye!
