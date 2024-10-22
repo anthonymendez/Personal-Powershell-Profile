@@ -83,9 +83,12 @@ function Setup-Basic-Packages {
         Write-Host "Oh-My-Posh already exists in environment variables."
     }
 
+    # Open new terminal session to load with newly installed packages, and install the oh-my-posh Nerd fonts.
+    $ohMyPoshFontInstall = "oh-my-posh font install meslo"
+    Start-Process -FilePath "wt.exe" -ArgumentList "-Command", $ohMyPoshFontInstall -Wait
+    
     Copy-Item "$env:POSH_THEMES_PATH\paradox.omp.json" "$env:POSH_THEMES_PATH\CUSTOM.omp.json"
-    oh-my-posh.exe font install meslo
-    $terminalSettingsFile = "$HOME\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+    $terminalSettingsFile = Resolve-Path "$HOME\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
     $terminalSettingsJson = Get-Content $terminalSettingsFile | ConvertFrom-Json
     # Check if "defaults" key exists under "profiles"
     if ($terminalSettingsJson.profiles.defaults) {
@@ -94,12 +97,10 @@ function Setup-Basic-Packages {
   
         # Convert the modified JSON back to a string and write to the file
         # TODO: FIX!
-        $terminalSettingsJson | ConvertTo-Json | Set-Content $terminalSettingsFile
+        $newTerminalSettingsJson = $terminalSettingsJson | ConvertTo-Json
+        Set-Content -Path $terminalSettingsFile -Value $newTerminalSettingsJson
     }
 
-    # Open new terminal session to load with newly installed packages, and install the oh-my-posh Nerd fonts.
-    $ohMyPoshFontInstall = "oh-my-posh font install meslo; Reload-Profile"
-    Start-Process -FilePath "wt.exe" -ArgumentList "-d", $HOME, "-p", "Windows PowerShell", "-c", "$ohMyPoshFontInstall"
     exit
 }
 
