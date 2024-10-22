@@ -17,21 +17,26 @@ I decided to setup this Repo in case anyone else finds this useful.
    3. Closes the original Terminal session.
    
    ```PowerShell
+   # Allows us to run PowerShell scripts.
+   Set-ExecutionPolicy Unrestricted -Scope CurrentUser
+   winget install --id Microsoft.PowerShell --source winget --accept-package-agreements --accept-source-agreements
+   # Creating Terminal Settings file if it doesn't exist.
+   $settingsPath = Resolve-Path "$HOME\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
+   New-Item -Path (Split-Path -Path $settingsPath -Parent) -ItemType Directory -Force | Out-Null; New-Item -Path $settingsPath -ItemType File -Force | Out-Null
+   # Sets up the command to make PowerShell 7 our new default shell.
    $command = "iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/ChrisTitusTech/winutil/refs/heads/main/functions/public/Invoke-WPFTweakPS7.ps1')); Invoke-WPFTweakPS7 -action PS7"
-   winget install --id Microsoft.PowerShell --source winget --accept-package-agreements --accept-source-agreements 
+   # Start new PowerShell 7 terminal.
    Start-Process -FilePath "$env:ProgramFiles\PowerShell\7\pwsh.exe" -ArgumentList "-NoExit", "-Command", $command
    exit
    # Bye!
    ```
-1. Create PowerShell profile if it doesn't exist. This will overwrite it if it doesn't exist.
+1. Create new PowerShell profile file with mine!
+
    ```PowerShell
    New-Item -Path (Split-Path -Path $PROFILE -Parent) -ItemType Directory -Force | Out-Null; New-Item -Path $PROFILE -ItemType File -Force | Out-Null
-   ```
-1. Allow PowerShell scripts to run and copy my PowerShell profile into your profile.
-   ```PowerShell
-   Set-ExecutionPolicy Unrestricted -Scope CurrentUser
    Invoke-WebRequest https://raw.githubusercontent.com/anthonymendez/Personal-Powershell-Profile/refs/heads/main/Microsoft.PowerShell_profile.ps1 -OutFile $PROFILE
    ```
+
 1. Restart the Terminal, now we'll setup/upgrade the Package Managers (winget, choco, scoop). Afterwards, we install our basic packages (gsudo, fastfetch, neovim, ohmyposh). We reload after each operation.
 
    Restarting the terminal is necessary, as reloading the profile will not reload the functions.
