@@ -82,6 +82,7 @@ function Setup-Basic-Packages {
     else {
         Write-Host "Oh-My-Posh already exists in environment variables."
     }
+
     Copy-Item "$env:POSH_THEMES_PATH\paradox.omp.json" "$env:POSH_THEMES_PATH\CUSTOM.omp.json"
     oh-my-posh.exe font install meslo
     $terminalSettingsFile = "$HOME\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
@@ -92,6 +93,7 @@ function Setup-Basic-Packages {
         $terminalSettingsJson.profiles.defaults.font.face = "MesloLGM Nerd Font"
   
         # Convert the modified JSON back to a string and write to the file
+        # TODO: FIX!
         $terminalSettingsJson | ConvertTo-Json | Set-Content $terminalSettingsFile
     }
 
