@@ -1,0 +1,28 @@
+# Ignore Modules directory.
+Modules
+
+# Ignore build output
+bin/
+obj/
+
+# Ignore temporary files
+*.tmp
+*.temp
+
+# Ignore PowerShell ISE file
+*.ps1xml
+
+# Ignore Visual Studio Code settings
+.vscode/
+
+# Ignore NuGet packages
+packages/
+
+# Ignore project.lock.json
+project.lock.json
+
+# Ignore VSCode profile
+Microsoft.VSCode_profile.ps1
+
+# Ignore pwoershell config
+powershell.config.json
