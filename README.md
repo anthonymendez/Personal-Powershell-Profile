@@ -35,47 +35,36 @@ I decided to setup this Repo in case anyone else finds this useful.
    Invoke-WebRequest https://raw.githubusercontent.com/anthonymendez/Personal-Powershell-Profile/refs/heads/main/Scripts/Run-Setup.ps1 | Invoke-Expression
    ```
 
-1. Customize the profile and make it your own! I have several automated commands that run and backup config files I use regularly. Some sections you should customize:
-   - `Setup-Basic-Packages` - Installs oh-my-posh, FastFetch, Neovim, and gsudo. You may want your own essential programs here.
-   - `Restore-Profile` - Function that restores my configuration files based on a given folder.
-   - `Aliases` - Common aliases I use for certain programs.
-   - `Variables` - Common variables I use for quick access.
-   - `Start-Job -Name $SettingsSyncJobName -ScriptBlock` - Backs up your settings to the folder `$HOME\w11_terminal`.
-   - `Setting up new terminal window.` - Clears previous output, initializes oh-my-posh, and prints out fastfetch.
+1. Customize the profile and make it your own!
 
 ## Functions
 
 ### Reload-Profile
 
-Reloads the powershell profile in place.
-
+Reloads the PowerShell profile in place, ensuring that all configurations are reloaded.
 ### Check-Sync
 
-Check the status of the settings sync that occurs on each new terminal session or `Reload-Profile`.
+Checks the status of the settings sync that occurs on each new terminal session or `Reload-Profile`, providing feedback on any issues.
 
 ### pshistory
 
-Prints out the full history of Powershell. Similar to `cat .bash_history`.
-
+Prints out the full history of PowerShell commands executed during the current session, similar to how `cat .bash_history` works in Bash.
 ### yt-dlp-audio
 
-Basically an "alias" to easily get the `wav` file of videos.
-
+An alias for easily downloading the audio file (in WAV format) from videos using `yt-dlp`.
 ### Validate-Directory
 
-Checks if the provided path is null, empty, or if it exists.
-
+Checks if the provided path is null, empty, or does not exist. This helps prevent errors when trying to perform operations on non-existent directories.
 ### Restore-Folder - TO BE IMPLEMENTED
 
-Writes the folder contents of `$from` to `$to` folder.
-
+Writes the folder contents of `$from` to `$to` folder, recursively copying all files and subdirectories.
 ### Restore-Files - TO BE IMPLEMENTED
 
-Writes the file contents of `$from` to `$to` folder. `$from` can be a regex path.
+Writes the file contents of `$from` to `$to` folder. If `$from` is a regex path, it will match and copy all matching files.
 
 ### Restore-Config
 
-Handles prompting to restore the configuration for a given path/file/file regex to the given destination/target directory.
+Handles prompting to restore the configuration for a given path/file/file regex to the given destination/target directory. This includes backup functionality to ensure that no data is lost during the restoration process.
 
 Example: `Restore-Config 'glzr' 'glzr (e.g. GlazeWM & Zebar)' "$dir/.glzr" "$HOME"`
 
@@ -83,7 +72,7 @@ Example: `Restore-Config 'glzr' 'glzr (e.g. GlazeWM & Zebar)' "$dir/.glzr" "$HOM
 
 ### Restore-Profile - TO BE FINISHED
 
-Performs the full restoration process given the source directory.
+Performs the full restoration process given the source directory. This includes checking for and handling any dependencies, ensuring that all configurations are restored correctly.
 
 ## Aliases
 
