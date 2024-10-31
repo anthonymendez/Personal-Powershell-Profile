@@ -99,8 +99,6 @@ function Setup-Basic-Packages {
         $newTerminalSettingsJson = $terminalSettingsJson | ConvertTo-Json
         Set-Content -Path $terminalSettingsFile -Value $newTerminalSettingsJson
     }
-
-    exit
 }
 
 # Setup Powershell again from a backed-up directory.
