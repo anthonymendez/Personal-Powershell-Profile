@@ -31,10 +31,8 @@ I decided to setup this Repo in case anyone else finds this useful.
 
 1. Restart the Terminal, now we'll setup/upgrade the Package Managers (winget, choco, scoop). Afterwards, we install our basic packages (gsudo, fastfetch, neovim, ohmyposh). We reload after each operation.
 
-   Restarting the terminal is necessary, as reloading the profile will not reload the functions.
-
    ```PowerShell
-   Invoke-WebRequest https://raw.githubusercontent.com/anthonymendez/Personal-Powershell-Profile/refs/heads/main/Scripts/Run-PowerShell7.ps1 | Invoke-Expression
+   Invoke-WebRequest https://raw.githubusercontent.com/anthonymendez/Personal-Powershell-Profile/refs/heads/main/Scripts/Run-Setup.ps1 | Invoke-Expression
    ```
 
 1. Customize the profile and make it your own! I have several automated commands that run and backup config files I use regularly. Some sections you should customize:

@@ -17,7 +17,7 @@ function Setup-Package-Managers {
         Where-Object "browser_download_url" -Match '.msixbundle' |
         Select-Object -ExpandProperty "browser_download_url"
         # download
-        Invoke-WebRequest -Uri $URL -OutFile "Setup.msix" -UseBasicParsing        # install
+        Invoke-WebRequest -Uri $URL -OutFile "Setup.msix" -UseBasicParsing
         Add-AppxPackage -Path "Setup.msix"
         # delete file
         Remove-Item "Setup.msix"
@@ -67,8 +67,8 @@ function Setup-Basic-Packages {
     winget install gerardog.gsudo -s winget --accept-package-agreements --accept-source-agreements 
     winget install Fastfetch-cli.Fastfetch -s winget --accept-package-agreements --accept-source-agreements 
     winget install Neovim.Neovim -s winget --accept-package-agreements --accept-source-agreements 
+    winget install JanDeDobbeleer.OhMyPosh -s winget --accept-package-agreements --accept-source-agreements
 
-    winget install JanDeDobbeleer.OhMyPosh -s winget --accept-package-agreements --accept-source-agreements 
     $ohMyPoshBin = "$HOME\AppData\Local\Programs\oh-my-posh\bin"
     $currentPath = [Environment]::GetEnvironmentVariable("PATH", "$env:USERNAME")
     # Check if the path is already in the PATH variable
@@ -84,8 +84,7 @@ function Setup-Basic-Packages {
     }
 
     # Open new terminal session to load with newly installed packages, and install the oh-my-posh Nerd fonts.
-    $ohMyPoshFontInstall = "oh-my-posh font install meslo"
-    Start-Process -FilePath "wt.exe" -ArgumentList "-Command", $ohMyPoshFontInstall -Wait
+    oh-my-posh font install meslo
     
     Copy-Item "$env:POSH_THEMES_PATH\paradox.omp.json" "$env:POSH_THEMES_PATH\CUSTOM.omp.json"
     $terminalSettingsFile = Resolve-Path "$HOME\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json"
